@@ -1,6 +1,5 @@
 import '@testing-library/jest-dom'
-import { render, screen, getAllByRole } from '@testing-library/react'
-import userEvent from '@testing-library/user-event'
+import { render, screen } from '@testing-library/react'
 import { BrowserRouter } from 'react-router-dom'
 import { Navbar } from '../components/Layout/Navbar'
 import { AuthProvider } from '../context/AuthContext'

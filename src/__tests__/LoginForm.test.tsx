@@ -81,7 +81,6 @@ describe('LoginForm Component', () => {
   describe('AC-003: Id validation', () => {
     it('should show id error message for empty id', async () => {
       renderLoginForm()
-      const idInput = screen.getByLabelText(/아이디/i)
       const passwordInput = screen.getByLabelText(/비밀번호/i)
 
       await userEvent.click(passwordInput)
