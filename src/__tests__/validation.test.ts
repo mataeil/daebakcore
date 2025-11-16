@@ -1,25 +1,19 @@
 import {
-  validateEmail,
+  validateId,
   validatePassword,
   validateLoginForm,
   validateCredentials,
 } from '../utils/validation'
 
 describe('Validation Utilities', () => {
-  describe('validateEmail', () => {
-    it('should return error for empty email', () => {
-      expect(validateEmail('')).toBe('필수 입력항목입니다')
+  describe('validateId', () => {
+    it('should return error for empty id', () => {
+      expect(validateId('')).toBe('필수 입력항목입니다')
     })
 
-    it('should return error for invalid email format', () => {
-      expect(validateEmail('invalid-email')).toBe('올바른 이메일 형식을 입력하세요')
-      expect(validateEmail('test@')).toBe('올바른 이메일 형식을 입력하세요')
-      expect(validateEmail('@example.com')).toBe('올바른 이메일 형식을 입력하세요')
-    })
-
-    it('should accept valid email format', () => {
-      expect(validateEmail('admin@example.com')).toBeNull()
-      expect(validateEmail('test.user@domain.co.kr')).toBeNull()
+    it('should accept valid id format', () => {
+      expect(validateId('admin')).toBeNull()
+      expect(validateId('user123')).toBeNull()
     })
   })
 
@@ -42,24 +36,18 @@ describe('Validation Utilities', () => {
   describe('validateLoginForm', () => {
     it('should return errors for empty fields', () => {
       const errors = validateLoginForm('', '')
-      expect(errors.email).toBeDefined()
+      expect(errors.id).toBeDefined()
       expect(errors.password).toBeDefined()
-    })
-
-    it('should return error for invalid email', () => {
-      const errors = validateLoginForm('invalid', 'validpassword123')
-      expect(errors.email).toBe('올바른 이메일 형식을 입력하세요')
-      expect(errors.password).toBeUndefined()
     })
 
     it('should return error for short password', () => {
-      const errors = validateLoginForm('test@example.com', 'short')
+      const errors = validateLoginForm('admin', 'short')
       expect(errors.password).toBeDefined()
-      expect(errors.email).toBeUndefined()
+      expect(errors.id).toBeUndefined()
     })
 
     it('should return no errors for valid inputs', () => {
-      const errors = validateLoginForm('admin@example.com', 'validpassword')
+      const errors = validateLoginForm('admin', 'validpassword')
       expect(Object.keys(errors).length).toBe(0)
     })
   })
@@ -69,8 +57,8 @@ describe('Validation Utilities', () => {
       expect(validateCredentials('admin', 'admin1234')).toBe(true)
     })
 
-    it('should return false for incorrect email', () => {
-      expect(validateCredentials('wrongemail', 'admin1234')).toBe(false)
+    it('should return false for incorrect id', () => {
+      expect(validateCredentials('wrongid', 'admin1234')).toBe(false)
     })
 
     it('should return false for incorrect password', () => {

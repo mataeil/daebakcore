@@ -1,26 +1,35 @@
 /**
  * 로그인 폼 컴포넌트
+ * Bootstrap form-control-lg 스타일 적용
  */
 
-import React, { useState } from 'react'
+import React, { useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
 import { validateLoginForm } from '../../utils/validation'
 import { LOGIN_REDIRECT_DELAY } from '../../utils/constants'
+import 'bootstrap/dist/css/bootstrap.min.css'
 
 export const LoginForm: React.FC = () => {
   const navigate = useNavigate()
   const { login } = useAuth()
+  const idInputRef = useRef<HTMLInputElement>(null)
 
-  const [email, setEmail] = useState('')
+  const [id, setId] = useState('')
   const [password, setPassword] = useState('')
   const [rememberMe, setRememberMe] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [globalError, setGlobalError] = useState('')
   const [isLoading, setIsLoading] = useState(false)
 
+  React.useEffect(() => {
+    if (idInputRef.current) {
+      idInputRef.current.focus()
+    }
+  }, [])
+
   const handleBlur = (field: string, value: string) => {
-    const validationErrors = validateLoginForm(field === 'email' ? value : email, field === 'password' ? value : password)
+    const validationErrors = validateLoginForm(field === 'id' ? value : id, field === 'password' ? value : password)
     setErrors(prev => ({
       ...prev,
       [field]: validationErrors[field] || '',
@@ -31,7 +40,7 @@ export const LoginForm: React.FC = () => {
     e.preventDefault()
     setGlobalError('')
 
-    const validationErrors = validateLoginForm(email, password)
+    const validationErrors = validateLoginForm(id, password)
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors)
       return
@@ -39,7 +48,7 @@ export const LoginForm: React.FC = () => {
 
     setIsLoading(true)
     try {
-      const success = await login(email, password, rememberMe)
+      const success = await login(id, password, rememberMe)
       if (success) {
         setTimeout(() => {
           navigate('/dashboard')
@@ -54,12 +63,12 @@ export const LoginForm: React.FC = () => {
   }
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && !isLoading && !errors.email && !errors.password) {
+    if (e.key === 'Enter' && !isLoading && !errors.id && !errors.password) {
       handleSubmit(e as any)
     }
   }
 
-  const isFormValid = email.trim() !== '' && password.trim() !== '' && !errors.email && !errors.password
+  const isFormValid = id.trim() !== '' && password.trim() !== '' && !errors.id && !errors.password
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
@@ -70,23 +79,25 @@ export const LoginForm: React.FC = () => {
       )}
 
       <div>
-        <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-          이메일
+        <label htmlFor="id" className="form-label fw-semibold">
+          아이디
         </label>
         <input
-          id="email"
+          ref={idInputRef}
+          id="id"
           type="text"
-          placeholder="Enter email"
-          value={email}
-          onChange={e => setEmail(e.target.value)}
-          onBlur={() => handleBlur('email', email)}
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          placeholder="Enter id"
+          value={id}
+          onChange={e => setId(e.target.value)}
+          onBlur={() => handleBlur('id', id)}
+          autoFocus
+          className="form-control form-control-lg"
         />
-        {errors.email && <p className="text-red-600 text-sm mt-1">{errors.email}</p>}
+        {errors.id && <p className="text-danger text-sm mt-1">{errors.id}</p>}
       </div>
 
       <div>
-        <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+        <label htmlFor="password" className="form-label fw-semibold">
           비밀번호
         </label>
         <input
@@ -97,20 +108,20 @@ export const LoginForm: React.FC = () => {
           onChange={e => setPassword(e.target.value)}
           onBlur={() => handleBlur('password', password)}
           onKeyPress={handleKeyPress}
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="form-control form-control-lg"
         />
-        {errors.password && <p className="text-red-600 text-sm mt-1">{errors.password}</p>}
+        {errors.password && <p className="text-danger text-sm mt-1">{errors.password}</p>}
       </div>
 
-      <div className="flex items-center">
+      <div className="form-check">
         <input
           id="remember"
           type="checkbox"
           checked={rememberMe}
           onChange={e => setRememberMe(e.target.checked)}
-          className="h-4 w-4 text-blue-600 rounded focus:ring-blue-500"
+          className="form-check-input"
         />
-        <label htmlFor="remember" className="ml-2 text-sm text-gray-700">
+        <label htmlFor="remember" className="form-check-label">
           기억하기
         </label>
       </div>
@@ -118,7 +129,7 @@ export const LoginForm: React.FC = () => {
       <button
         type="submit"
         disabled={!isFormValid || isLoading}
-        className="w-full py-2 px-4 rounded-lg font-medium text-white bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
+        className="btn btn-primary btn-lg w-100"
       >
         {isLoading ? '로그인 중...' : '로그인'}
       </button>

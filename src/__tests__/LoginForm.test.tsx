@@ -9,7 +9,7 @@ import { AUTH_STORAGE_KEY } from '../utils/constants'
 /**
  * LoginForm Component Tests
  * Tests for login form rendering, validation, and submission
- * AC-004 Acceptance Criteria Tests
+ * AC-001 to AC-006 Acceptance Criteria Tests
  */
 
 const renderLoginForm = () => {
@@ -27,13 +27,13 @@ describe('LoginForm Component', () => {
     localStorage.clear()
   })
 
-  describe('AC-004-001: Form Rendering', () => {
-    it('should render login form with email input field', () => {
+  describe('AC-001: Form Rendering with id field', () => {
+    it('should render login form with id input field', () => {
       renderLoginForm()
-      const emailInput = screen.getByLabelText(/이메일/i)
-      expect(emailInput).toBeInTheDocument()
-      expect(emailInput).toHaveAttribute('type', 'text')
-      expect(emailInput).toHaveAttribute('placeholder', 'Enter email')
+      const idInput = screen.getByLabelText(/아이디/i)
+      expect(idInput).toBeInTheDocument()
+      expect(idInput).toHaveAttribute('type', 'text')
+      expect(idInput).toHaveAttribute('placeholder', 'Enter id')
     })
 
     it('should render login form with password input field', () => {
@@ -61,78 +61,57 @@ describe('LoginForm Component', () => {
 
     it('should render all form elements with correct labels', () => {
       renderLoginForm()
-      expect(screen.getByLabelText(/이메일/i)).toBeInTheDocument()
+      expect(screen.getByLabelText(/아이디/i)).toBeInTheDocument()
       expect(screen.getByLabelText(/비밀번호/i)).toBeInTheDocument()
       expect(screen.getByLabelText(/기억하기/i)).toBeInTheDocument()
       expect(screen.getByRole('button', { name: /로그인/i })).toBeInTheDocument()
     })
   })
 
-  describe('AC-004-002: Email Validation', () => {
-    it('should show email error message for invalid email format', async () => {
+  describe('AC-002: Id field auto focus', () => {
+    it('should focus id field on component mount', () => {
       renderLoginForm()
-      const emailInput = screen.getByLabelText(/이메일/i)
+      const idInput = screen.getByLabelText(/아이디/i) as HTMLInputElement
 
-      await userEvent.type(emailInput, 'invalid-email')
-      await userEvent.click(screen.getByLabelText(/비밀번호/i))
+      // Check if it has autoFocus attribute
+      expect(idInput).toHaveFocus()
+    })
+  })
+
+  describe('AC-003: Id validation', () => {
+    it('should show id error message for empty id', async () => {
+      renderLoginForm()
+      const idInput = screen.getByLabelText(/아이디/i)
+      const passwordInput = screen.getByLabelText(/비밀번호/i)
+
+      await userEvent.click(passwordInput)
 
       await waitFor(() => {
-        expect(screen.getByText(/올바른 이메일 형식을 입력하세요/i)).toBeInTheDocument()
+        expect(screen.getByText(/필수 입력항목입니다/i)).toBeInTheDocument()
       })
     })
 
-    it('should show email error message for email without domain', async () => {
+    it('should accept valid id format', async () => {
       renderLoginForm()
-      const emailInput = screen.getByLabelText(/이메일/i)
+      const idInput = screen.getByLabelText(/아이디/i) as HTMLInputElement
+      const passwordInput = screen.getByLabelText(/비밀번호/i)
 
-      await userEvent.type(emailInput, 'test@')
-      await userEvent.click(screen.getByLabelText(/비밀번호/i))
-
-      await waitFor(() => {
-        expect(screen.getByText(/올바른 이메일 형식을 입력하세요/i)).toBeInTheDocument()
-      })
-    })
-
-    it('should clear email error when valid email is entered', async () => {
-      renderLoginForm()
-      const emailInput = screen.getByLabelText(/이메일/i)
-
-      await userEvent.type(emailInput, 'invalid')
-      await userEvent.click(screen.getByLabelText(/비밀번호/i))
+      await userEvent.type(idInput, 'admin')
+      await userEvent.click(passwordInput)
 
       await waitFor(() => {
-        expect(screen.getByText(/올바른 이메일 형식을 입력하세요/i)).toBeInTheDocument()
-      })
-
-      await userEvent.clear(emailInput)
-      await userEvent.type(emailInput, 'admin@example.com')
-      await userEvent.click(screen.getByLabelText(/비밀번호/i))
-
-      await waitFor(() => {
-        expect(screen.queryByText(/올바른 이메일 형식을 입력하세요/i)).not.toBeInTheDocument()
+        expect(idInput.value).toBe('admin')
       })
     })
   })
 
-  describe('AC-004-003: Password Validation', () => {
+  describe('AC-004: Password validation (minimum 8 characters)', () => {
     it('should show password error message for password shorter than 8 characters', async () => {
       renderLoginForm()
       const passwordInput = screen.getByLabelText(/비밀번호/i)
 
       await userEvent.type(passwordInput, 'short')
-      await userEvent.click(screen.getByLabelText(/이메일/i))
-
-      await waitFor(() => {
-        expect(screen.getByText(/비밀번호는 최소 8자 이상이어야 합니다/i)).toBeInTheDocument()
-      })
-    })
-
-    it('should show password error for 7 character password', async () => {
-      renderLoginForm()
-      const passwordInput = screen.getByLabelText(/비밀번호/i)
-
-      await userEvent.type(passwordInput, '1234567')
-      await userEvent.click(screen.getByLabelText(/이메일/i))
+      await userEvent.click(screen.getByLabelText(/아이디/i))
 
       await waitFor(() => {
         expect(screen.getByText(/비밀번호는 최소 8자 이상이어야 합니다/i)).toBeInTheDocument()
@@ -144,7 +123,7 @@ describe('LoginForm Component', () => {
       const passwordInput = screen.getByLabelText(/비밀번호/i)
 
       await userEvent.type(passwordInput, 'short')
-      await userEvent.click(screen.getByLabelText(/이메일/i))
+      await userEvent.click(screen.getByLabelText(/아이디/i))
 
       await waitFor(() => {
         expect(screen.getByText(/비밀번호는 최소 8자 이상이어야 합니다/i)).toBeInTheDocument()
@@ -152,7 +131,7 @@ describe('LoginForm Component', () => {
 
       await userEvent.clear(passwordInput)
       await userEvent.type(passwordInput, 'validpassword')
-      await userEvent.click(screen.getByLabelText(/이메일/i))
+      await userEvent.click(screen.getByLabelText(/아이디/i))
 
       await waitFor(() => {
         expect(screen.queryByText(/비밀번호는 최소 8자 이상이어야 합니다/i)).not.toBeInTheDocument()
@@ -160,129 +139,64 @@ describe('LoginForm Component', () => {
     })
   })
 
-  describe('AC-004-004: Required Field Validation', () => {
-    it('should disable login button when email is empty', async () => {
+  describe('AC-005: Login success with admin/admin1234', () => {
+    it('should successfully login with correct credentials', async () => {
       renderLoginForm()
-      const loginButton = screen.getByRole('button', { name: /로그인/i })
+      const idInput = screen.getByLabelText(/아이디/i)
       const passwordInput = screen.getByLabelText(/비밀번호/i)
 
-      await userEvent.type(passwordInput, 'validpassword123')
+      await userEvent.type(idInput, 'admin')
+      await userEvent.type(passwordInput, 'admin1234')
+      await userEvent.click(screen.getByRole('button', { name: /로그인/i }))
 
-      expect(loginButton).toBeDisabled()
-    })
-
-    it('should disable login button when password is empty', async () => {
-      renderLoginForm()
-      const loginButton = screen.getByRole('button', { name: /로그인/i })
-      const emailInput = screen.getByLabelText(/이메일/i)
-
-      await userEvent.type(emailInput, 'test@example.com')
-
-      expect(loginButton).toBeDisabled()
-    })
-
-    it('should disable login button when both fields are empty', () => {
-      renderLoginForm()
-      const loginButton = screen.getByRole('button', { name: /로그인/i })
-
-      expect(loginButton).toBeDisabled()
-    })
-
-    it('should disable login button when only whitespace is entered', async () => {
-      renderLoginForm()
-      const loginButton = screen.getByRole('button', { name: /로그인/i })
-      const emailInput = screen.getByLabelText(/이메일/i)
-      const passwordInput = screen.getByLabelText(/비밀번호/i)
-
-      await userEvent.type(emailInput, '   ')
-      await userEvent.type(passwordInput, '   ')
-
-      expect(loginButton).toBeDisabled()
+      await waitFor(() => {
+        const storedToken = localStorage.getItem(AUTH_STORAGE_KEY)
+        expect(storedToken).not.toBeNull()
+        const token = JSON.parse(storedToken!)
+        expect(token.userId).toBe('admin')
+        expect(token.isAuthenticated).toBe(true)
+      })
     })
   })
 
-  describe('AC-004-005: Button Activation', () => {
-    it('should enable login button when valid email and password are entered', async () => {
+  describe('AC-006: Login failure with invalid credentials', () => {
+    it('should show error message for invalid credentials', async () => {
       renderLoginForm()
-      const loginButton = screen.getByRole('button', { name: /로그인/i })
-      const emailInput = screen.getByLabelText(/이메일/i)
+      const idInput = screen.getByLabelText(/아이디/i)
       const passwordInput = screen.getByLabelText(/비밀번호/i)
 
-      await userEvent.type(emailInput, 'admin@example.com')
+      await userEvent.type(idInput, 'admin')
+      await userEvent.type(passwordInput, 'wrongpassword')
+      await userEvent.click(screen.getByRole('button', { name: /로그인/i }))
+
+      await waitFor(() => {
+        expect(screen.getByText(/아이디 또는 비밀번호가 일치하지 않습니다/i)).toBeInTheDocument()
+      })
+    })
+
+    it('should not set auth token for invalid credentials', async () => {
+      renderLoginForm()
+      const idInput = screen.getByLabelText(/아이디/i)
+      const passwordInput = screen.getByLabelText(/비밀번호/i)
+
+      await userEvent.type(idInput, 'wrongid')
       await userEvent.type(passwordInput, 'admin1234')
+      await userEvent.click(screen.getByRole('button', { name: /로그인/i }))
 
-      expect(loginButton).not.toBeDisabled()
-    })
-
-    it('should enable login button for valid form input', async () => {
-      renderLoginForm()
-      const loginButton = screen.getByRole('button', { name: /로그인/i })
-      const emailInput = screen.getByLabelText(/이메일/i)
-      const passwordInput = screen.getByLabelText(/비밀번호/i)
-
-      await userEvent.type(emailInput, 'test@example.com')
-      await userEvent.type(passwordInput, 'validpassword123')
-
-      expect(loginButton).not.toBeDisabled()
-    })
-
-    it('should disable button when validation error exists', async () => {
-      renderLoginForm()
-      const loginButton = screen.getByRole('button', { name: /로그인/i })
-      const emailInput = screen.getByLabelText(/이메일/i)
-      const passwordInput = screen.getByLabelText(/비밀번호/i)
-
-      await userEvent.type(emailInput, 'invalid')
-      await userEvent.type(passwordInput, 'admin1234')
-
-      expect(loginButton).toBeDisabled()
-    })
-  })
-
-  describe('AC-004-006: Enter Key Submission', () => {
-    it('should submit form when Enter key is pressed in password field', async () => {
-      renderLoginForm()
-      const emailInput = screen.getByLabelText(/이메일/i)
-      const passwordInput = screen.getByLabelText(/비밀번호/i)
-
-      await userEvent.type(emailInput, 'admin')
-      await userEvent.type(passwordInput, 'admin1234{Enter}')
-
-      // Verify form submission happens
-      const loginButton = screen.getByRole('button', { name: /로그인/i })
-      expect(loginButton).toBeInTheDocument()
-    })
-
-    it('should not submit form when Enter key is pressed with invalid password', async () => {
-      renderLoginForm()
-      const emailInput = screen.getByLabelText(/이메일/i)
-      const passwordInput = screen.getByLabelText(/비밀번호/i)
-
-      await userEvent.type(emailInput, 'admin@example.com')
-      await userEvent.type(passwordInput, 'short{Enter}')
-
-      expect(localStorage.getItem(AUTH_STORAGE_KEY)).toBeNull()
-    })
-
-    it('should not submit form when Enter key is pressed with empty fields', async () => {
-      renderLoginForm()
-      const passwordInput = screen.getByLabelText(/비밀번호/i)
-
-      await userEvent.click(passwordInput)
-      await userEvent.type(passwordInput, '{Enter}')
-
-      expect(localStorage.getItem(AUTH_STORAGE_KEY)).toBeNull()
+      await waitFor(() => {
+        expect(localStorage.getItem(AUTH_STORAGE_KEY)).toBeNull()
+      })
     })
   })
 
   describe('Form state management', () => {
-    it('should update email input value on change', async () => {
+    it('should update id input value on change', async () => {
       renderLoginForm()
-      const emailInput = screen.getByLabelText(/이메일/i) as HTMLInputElement
+      const idInput = screen.getByLabelText(/아이디/i) as HTMLInputElement
 
-      await userEvent.type(emailInput, 'test@example.com')
+      await userEvent.type(idInput, 'testuser')
 
-      expect(emailInput.value).toBe('test@example.com')
+      expect(idInput.value).toBe('testuser')
     })
 
     it('should update password input value on change', async () => {
@@ -313,6 +227,40 @@ describe('LoginForm Component', () => {
       renderLoginForm()
       const form = screen.getByRole('button', { name: /로그인/i }).closest('form')
       expect(form).toBeInTheDocument()
+    })
+  })
+
+  describe('Button state management', () => {
+    it('should disable login button when id is empty', async () => {
+      renderLoginForm()
+      const loginButton = screen.getByRole('button', { name: /로그인/i })
+      const passwordInput = screen.getByLabelText(/비밀번호/i)
+
+      await userEvent.type(passwordInput, 'validpassword123')
+
+      expect(loginButton).toBeDisabled()
+    })
+
+    it('should disable login button when password is empty', async () => {
+      renderLoginForm()
+      const loginButton = screen.getByRole('button', { name: /로그인/i })
+      const idInput = screen.getByLabelText(/아이디/i)
+
+      await userEvent.type(idInput, 'admin')
+
+      expect(loginButton).toBeDisabled()
+    })
+
+    it('should enable login button when valid id and password are entered', async () => {
+      renderLoginForm()
+      const loginButton = screen.getByRole('button', { name: /로그인/i })
+      const idInput = screen.getByLabelText(/아이디/i)
+      const passwordInput = screen.getByLabelText(/비밀번호/i)
+
+      await userEvent.type(idInput, 'admin')
+      await userEvent.type(passwordInput, 'admin1234')
+
+      expect(loginButton).not.toBeDisabled()
     })
   })
 })

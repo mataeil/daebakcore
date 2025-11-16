@@ -2,7 +2,7 @@
  * 입력값 유효성 검사 유틸리티
  */
 
-import { EMAIL_REGEX, MIN_PASSWORD_LENGTH, DEFAULT_ADMIN_ID, DEFAULT_ADMIN_PASSWORD } from './constants'
+import { MIN_PASSWORD_LENGTH, DEFAULT_ADMIN_ID, DEFAULT_ADMIN_PASSWORD } from './constants'
 
 export interface ValidationError {
   field: string
@@ -10,14 +10,11 @@ export interface ValidationError {
 }
 
 /**
- * 이메일 형식 검증
+ * 아이디 검증
  */
-export const validateEmail = (email: string): string | null => {
-  if (!email.trim()) {
+export const validateId = (id: string): string | null => {
+  if (!id.trim()) {
     return '필수 입력항목입니다'
-  }
-  if (!EMAIL_REGEX.test(email)) {
-    return '올바른 이메일 형식을 입력하세요'
   }
   return null
 }
@@ -39,14 +36,14 @@ export const validatePassword = (password: string): string | null => {
  * 로그인 폼 전체 검증
  */
 export const validateLoginForm = (
-  email: string,
+  id: string,
   password: string
 ): Record<string, string> => {
   const errors: Record<string, string> = {}
 
-  const emailError = validateEmail(email)
-  if (emailError) {
-    errors.email = emailError
+  const idError = validateId(id)
+  if (idError) {
+    errors.id = idError
   }
 
   const passwordError = validatePassword(password)
@@ -60,8 +57,8 @@ export const validateLoginForm = (
 /**
  * 로그인 자격증명 검증 (고정 계정)
  */
-export const validateCredentials = (email: string, password: string): boolean => {
+export const validateCredentials = (id: string, password: string): boolean => {
   // 초기 단계: 고정 계정만 지원
   // TODO: 추후 백엔드 API 인증으로 변경
-  return email === DEFAULT_ADMIN_ID && password === DEFAULT_ADMIN_PASSWORD
+  return id === DEFAULT_ADMIN_ID && password === DEFAULT_ADMIN_PASSWORD
 }

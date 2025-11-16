@@ -27,8 +27,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, [])
 
-  const login = async (email: string, password: string, rememberMe: boolean): Promise<boolean> => {
-    if (email === DEFAULT_ADMIN_ID && password === DEFAULT_ADMIN_PASSWORD) {
+  const login = async (id: string, password: string, rememberMe: boolean): Promise<boolean> => {
+    if (id === DEFAULT_ADMIN_ID && password === DEFAULT_ADMIN_PASSWORD) {
       const token: AuthToken = {
         userId: DEFAULT_ADMIN_ID,
         userName: DEFAULT_ADMIN_NAME,

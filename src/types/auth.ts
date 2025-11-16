@@ -16,7 +16,7 @@ export interface AuthToken {
 }
 
 export interface LoginCredentials {
-  email: string
+  id: string
   password: string
   rememberMe: boolean
 }
@@ -24,6 +24,6 @@ export interface LoginCredentials {
 export interface AuthContextType {
   isAuthenticated: boolean
   user: User | null
-  login: (email: string, password: string, rememberMe: boolean) => Promise<boolean>
+  login: (id: string, password: string, rememberMe: boolean) => Promise<boolean>
   logout: () => void
 }

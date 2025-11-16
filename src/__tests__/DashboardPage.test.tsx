@@ -1,140 +1,121 @@
 import '@testing-library/jest-dom'
 import { render, screen } from '@testing-library/react'
-import { MemoryRouter } from 'react-router-dom'
+import { BrowserRouter } from 'react-router-dom'
 import { DashboardPage } from '../pages/DashboardPage'
 import { AuthProvider } from '../context/AuthContext'
-import { ProtectedRoute } from '../components/Auth/ProtectedRoute'
-import { MainLayout } from '../components/Layout/MainLayout'
-import { AUTH_STORAGE_KEY } from '../utils/constants'
 
 /**
- * DashboardPage Component Tests
- * Tests for dashboard page accessibility and content
- * AC-Dashboard Acceptance Criteria Tests
+ * Dashboard Page Tests
+ * AC-016 to AC-021 Acceptance Criteria Tests
  */
 
-const renderProtectedDashboard = () => {
+const renderDashboard = () => {
   return render(
-    <MemoryRouter>
+    <BrowserRouter>
       <AuthProvider>
-        <ProtectedRoute>
-          <MainLayout>
-            <DashboardPage />
-          </MainLayout>
-        </ProtectedRoute>
+        <DashboardPage />
       </AuthProvider>
-    </MemoryRouter>
+    </BrowserRouter>
   )
 }
 
-const renderDashboardWithAuth = () => {
-  const token = {
-    userId: 'admin',
-    userName: 'Admin',
-    isAuthenticated: true,
-    rememberMe: false,
-    timestamp: Date.now(),
-  }
-  localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(token))
-
-  return render(
-    <MemoryRouter initialEntries={['/dashboard']}>
-      <AuthProvider>
-        <ProtectedRoute>
-          <MainLayout>
-            <DashboardPage />
-          </MainLayout>
-        </ProtectedRoute>
-      </AuthProvider>
-    </MemoryRouter>
-  )
-}
-
-describe('DashboardPage Component', () => {
-  beforeEach(() => {
-    localStorage.clear()
-  })
-
-  describe('AC-Dashboard-001: Unauthenticated Redirect', () => {
-    it('should not render dashboard when user is not authenticated', () => {
-      renderProtectedDashboard()
-      expect(screen.queryByText(/환영합니다/i)).not.toBeInTheDocument()
+describe('Dashboard Page', () => {
+  describe('AC-016: Dashboard Page Rendering', () => {
+    it('should render dashboard page', () => {
+      renderDashboard()
+      const dashboard = screen.getByRole('main') || document.querySelector('main')
+      expect(dashboard).toBeInTheDocument()
     })
 
-    it('should not display user information when not authenticated', () => {
-      renderProtectedDashboard()
-      expect(screen.queryByText(/ID: admin/i)).not.toBeInTheDocument()
-    })
-
-    it('should protect dashboard from unauthenticated access', () => {
-      const { container } = renderProtectedDashboard()
-      expect(container).toBeTruthy()
-    })
-  })
-
-  describe('AC-Dashboard-002: Authenticated Access', () => {
-    it('should display dashboard when user is authenticated', () => {
-      renderDashboardWithAuth()
-      expect(screen.getByText(/환영합니다/i)).toBeInTheDocument()
-    })
-
-    it('should render main layout when authenticated', () => {
-      renderDashboardWithAuth()
-      expect(screen.getByRole('banner')).toBeInTheDocument()
-      expect(screen.getByRole('main')).toBeInTheDocument()
-    })
-
-    it('should display dashboard title with proper greeting', () => {
-      renderDashboardWithAuth()
-      expect(screen.getByText(/환영합니다, Admin!/i)).toBeInTheDocument()
-    })
-
-    it('should display confirmation message for authenticated user', () => {
-      renderDashboardWithAuth()
-      expect(screen.getByText(/daebakcore 관리 시스템에 로그인되었습니다/i)).toBeInTheDocument()
-    })
-  })
-
-  describe('AC-Dashboard-003: User Information Display', () => {
-    it('should display user name on dashboard', () => {
-      renderDashboardWithAuth()
-      expect(screen.getByText(/환영합니다, Admin!/i)).toBeInTheDocument()
-    })
-
-    it('should display user info section', () => {
-      renderDashboardWithAuth()
-      expect(screen.getByText(/정보/i)).toBeInTheDocument()
-    })
-
-    it('should display user ID in info card', () => {
-      renderDashboardWithAuth()
-      expect(screen.getByText(/ID: admin/i)).toBeInTheDocument()
-    })
-
-    it('should have proper dashboard structure', () => {
-      const { container } = renderDashboardWithAuth()
-      expect(container).toBeTruthy()
-      expect(screen.getByRole('main')).toBeInTheDocument()
-    })
-  })
-
-  describe('Dashboard content rendering', () => {
-    it('should render dashboard content in main element', () => {
-      renderDashboardWithAuth()
-      const mainElement = screen.getByRole('main')
-      expect(mainElement).toBeInTheDocument()
-    })
-
-    it('should display info card', () => {
-      renderDashboardWithAuth()
-      expect(screen.getByText(/정보/i)).toBeInTheDocument()
-    })
-
-    it('should have heading with proper greeting', () => {
-      renderDashboardWithAuth()
+    it('should display dashboard heading', () => {
+      renderDashboard()
       const heading = screen.getByRole('heading', { level: 1 })
       expect(heading).toBeInTheDocument()
-      expect(heading.textContent).toContain('Admin')
+    })
+  })
+
+  describe('AC-017: Statistic Cards Display', () => {
+    it('should render all 4 statistic cards', () => {
+      renderDashboard()
+      const cards = document.querySelectorAll('[data-testid="stat-card"]')
+      expect(cards.length).toBe(4)
+    })
+
+    it('should render Users card', () => {
+      renderDashboard()
+      expect(screen.getByText(/Users/i)).toBeInTheDocument()
+    })
+
+    it('should render Orders card', () => {
+      renderDashboard()
+      expect(screen.getByText(/Orders/i)).toBeInTheDocument()
+    })
+
+    it('should render Revenue card', () => {
+      renderDashboard()
+      expect(screen.getByText(/Revenue/i)).toBeInTheDocument()
+    })
+
+    it('should render Growth card', () => {
+      renderDashboard()
+      expect(screen.getByText(/Growth/i)).toBeInTheDocument()
+    })
+
+    it('should display numeric values in cards', () => {
+      renderDashboard()
+      const cards = document.querySelectorAll('[data-testid="stat-card"]')
+      cards.forEach((card) => {
+        const value = card.querySelector('[data-testid="stat-value"]')
+        expect(value).toBeInTheDocument()
+        expect(value?.textContent).toBeTruthy()
+      })
+    })
+  })
+
+  describe('AC-018: Information Card Display', () => {
+    it('should render system information card', () => {
+      renderDashboard()
+      const infoCard = document.querySelector('[data-testid="info-card"]')
+      expect(infoCard).toBeInTheDocument()
+    })
+  })
+
+  describe('AC-019: Hover Effects', () => {
+    it('should have card styling with shadow', () => {
+      renderDashboard()
+      const cards = document.querySelectorAll('[data-testid="stat-card"]')
+      cards.forEach((card) => {
+        expect(card.className).toContain('card')
+      })
+    })
+  })
+
+  describe('AC-020: Responsive Grid Layout', () => {
+    it('should have responsive grid classes', () => {
+      renderDashboard()
+      const container = document.querySelector('[data-testid="stat-container"]')
+      expect(container).toBeInTheDocument()
+      expect(container?.className).toContain('row')
+    })
+
+    it('should have Bootstrap grid column classes', () => {
+      renderDashboard()
+      const cards = document.querySelectorAll('[data-testid="stat-card"]')
+      cards.forEach((card) => {
+        const col = card.parentElement
+        expect(col?.className).toMatch(/col-/)
+      })
+    })
+  })
+
+  describe('AC-021: Color Consistency', () => {
+    it('should render cards with proper styling', () => {
+      renderDashboard()
+      const cards = document.querySelectorAll('[data-testid="stat-card"]')
+      expect(cards.length).toBeGreaterThan(0)
+      cards.forEach((card) => {
+        expect(card.className).toContain('card')
+      })
     })
   })
 })

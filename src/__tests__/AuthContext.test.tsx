@@ -1,5 +1,6 @@
 import '@testing-library/jest-dom'
 import { render, screen, waitFor } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { AuthProvider, useAuth } from '../context/AuthContext'
 import { AUTH_STORAGE_KEY } from '../utils/constants'
 
@@ -66,7 +67,7 @@ describe('AuthContext', () => {
     expect(screen.getByTestId('auth-status')).toHaveTextContent('Authenticated: Admin')
 
     const logoutButton = screen.getByRole('button', { name: /Logout/i })
-    logoutButton.click()
+    await userEvent.click(logoutButton)
 
     await waitFor(() => {
       expect(screen.getByTestId('auth-status')).toHaveTextContent('Not authenticated')
